@@ -462,4 +462,129 @@ public interface AdvancedColumnFamilyOptionsInterface<
    * @return true if consistency checks are enforced
    */
   boolean forceConsistencyChecks();
+
+
+  /* When set, large values (blobs) are written to separate blob files, and
+   * only pointers to them are stored in SST files. This can reduce write
+   * amplification for large-value use cases at the cost of introducing a level
+   * of indirection for reads. See also the options min_blob_size,
+   * blob_file_size, blob_compression_type, enable_blob_garbage_collection,
+   * and blob_garbage_collection_age_cutoff below.
+   *
+   * Default: false
+   *
+   * Dynamically changeable through the SetOptions() API
+   *
+   * @return the reference to the current options.
+   */
+  T setBlobEnabled(boolean enableBlobFiles);
+
+  /**
+   * If set true, separate blob files are enabled.
+   *
+   * @return true if blob files are enabled.
+   */
+  boolean isBlobEnabled();
+
+  /* The size of the smallest value to be stored separately in a blob file.
+   * Values which have an uncompressed size smaller than this threshold are
+   * stored alongside the keys in SST files in the usual fashion. A value of
+   * zero for this option means that all values are stored in blob files. Note
+   * that isBlobEnabled must be true in order for this option to have any
+   * effect.
+   *
+   * Default: 0
+   *
+   * Dynamically changeable through the SetOptions() API
+   *
+   * @return the reference to the current options.
+   */
+  T setMinBlobValueSize(long minBlobValueSize);
+
+  /**
+   * @return minimum blob size.
+   */
+  long minBlobValueSize();
+
+  /*
+   * The size limit for blob files. When writing blob files, a new file is
+   * opened once this limit is reached. Note that isBlobEnabled must be
+   * true set in order for this option to have any effect.
+   *
+   * Default: 256 MB
+   *
+   * Dynamically changeable through the SetOptions() API
+   *
+   * @return the reference to the current options.
+   */
+  T setBlobFileSize(long);
+
+  /**
+   * @return blob file size
+   */
+  long blobFileSize();
+
+  /*
+   * The compression algorithm to use for large values stored in blob files.
+   * Note that enable_blob_files has to be set in order for this option to have
+   * any effect.
+   *
+   * Default: no compression
+   *
+   * Dynamically changeable through the SetOptions() API
+   *
+   * Default: {@link CompressionType#DISABLE_COMPRESSION_OPTION}
+   *
+   * @param blobCompressionType The compression type to use for blob
+   *     values
+   *
+   * @return the reference to the current options.
+   */
+  T setBlobCompressionType(
+    final CompressionType blobCompressionType);
+
+  /**
+   * @return blob value compression type.
+   */
+  CompressionType blobCompressionType();
+
+  /*
+   * Enables garbage collection of blobs. Blob GC is performed as part of
+   * compaction. Valid blobs residing in blob files older than a cutoff get
+   * relocated to new files as they are encountered during compaction, which
+   * makes it possible to clean up blob files once they contain nothing but
+   * obsolete/garbage blobs. See also blob_garbage_collection_age_cutoff below.
+   *
+   * Default: false
+   *
+   * Dynamically changeable through the SetOptions() API
+   *
+   * @return the reference to the current options.
+   */
+  T setBlobGarbageCollection(boolean blobGarbageCollectionEnabled);
+
+  /**
+   * @return blob garbage collection enbled.
+   */
+  boolean blobGarbageCollection();
+
+  /*
+   * The cutoff in terms of blob file age for garbage collection. Blobs in
+   * the oldest N blob files will be relocated when encountered during
+   * compaction, where N = garbage_collection_cutoff * number_of_blob_files.
+   * Note that enable_blob_garbage_collection has to be set in order for this
+   * option to have any effect.
+   *
+   * Default: 0.25
+   *
+   * Dynamically changeable through the SetOptions() API
+   *
+   * @return the reference to the current options.
+   */
+  T setBlobGarbageCollectionAgeCutoff(double blobGarbageCollectionAgeCutoff);
+
+  /*
+   * @return blob garbage collection age cutoff
+   */
+  double blobGarbageCollectionAgeCutoff();
 }
